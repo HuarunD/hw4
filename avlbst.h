@@ -336,16 +336,16 @@ void AVLTree<Key, Value>::RemoveFix(AVLNode<Key,Value>* n, size_t diff){
 			ndiff = -1;
 		}
 	}
-	if((signed)diff==-1){
-		if((unsigned)n->getBalance()+diff==-2){
+	if(diff==-1){
+		if(n->getBalance()+diff==-2){
 			AVLNode<Key, Value>* c = n->getLeft();
-			if((signed)c->getBalance()==-1){
+			if(c->getBalance()==-1){
 				rotateRight(n);
 				n->setBalance(0);
 				c->setBalance(0);
 				RemoveFix(p, ndiff);
 			}
-			else if((signed)c->getBalance()==0){
+			else if(c->getBalance()==0){
 				rotateRight(n);
 				n->setBalance(-1);
 				c->setBalance(1);
@@ -354,12 +354,12 @@ void AVLTree<Key, Value>::RemoveFix(AVLNode<Key,Value>* n, size_t diff){
 				AVLNode<Key, Value>* g = c->getRight();
 				rotateLeft(c);
 				rotateRight(n);
-				if((signed)g->getBalance()==1){
+				if(g->getBalance()==1){
 					n->setBalance(0);
 					c->setBalance(-1);
 					g->setBalance(0);
 				}
-				else if((signed)(g->getBalance())==0){
+				else if((g->getBalance())==0){
 					n->setBalance(0);
 					c->setBalance(0);
 					g->setBalance(0);
@@ -373,7 +373,7 @@ void AVLTree<Key, Value>::RemoveFix(AVLNode<Key,Value>* n, size_t diff){
 			}
 
 		}
-		else if((signed)(n->getBalance() + diff )== -1){
+		else if((n->getBalance() + diff )== -1){
 			n->setBalance(-1);
 		}
 		else{
@@ -382,7 +382,7 @@ void AVLTree<Key, Value>::RemoveFix(AVLNode<Key,Value>* n, size_t diff){
 		}
 	}
 	else{
-		if((signed)(n->getBalance()+diff)==2){
+		if((n->getBalance()+diff)==2){
 			AVLNode<Key, Value>* c = n->getRight();
 			if(c->getBalance()==1){
 				rotateLeft(n);
