@@ -13,6 +13,23 @@ using namespace std;
 bool equalPaths(Node * root)
 {
     // Add your code below
-
+    int heights_ =-1;
+    return fdepth(root,0, &heights_);
+}
+bool fdepth(Node * root, int heights , int* t_h)
+{
+    if(root == nullptr){
+        return true;
+    }
+    if(root->left == nullptr && root->right == nullptr){
+        if(*t_h == -1){
+            *t_h = heights;
+        }
+        else{
+            return *t_h == heights;
+        }
+        return true;
+    }
+    return fdepth(root->left, heights+1, t_h)&& fdepth(root->right, heights+1, t_h);
 }
 

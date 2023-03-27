@@ -29,4 +29,5 @@ struct Node {
  */
 bool equalPaths(Node * root);
 
+bool fdepth(Node * root, int heights , int* t_h);
 #endif

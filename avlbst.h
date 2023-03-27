@@ -137,9 +137,128 @@ protected:
     virtual void nodeSwap( AVLNode<Key,Value>* n1, AVLNode<Key,Value>* n2);
 
     // Add helper functions here
+    virtual void rotateRight(AVLNode<Key,Value>*n);
+    virtual void rotateLeft(AVLNode<Key,Value>*n);
+    virtual void Insertfix(AVLNode<Key,Value>*p, AVLNode<Key,Value>*n);
+    virtual void RemoveFix(AVLNode<Key,Value>*n, size_t diff);
 
 
 };
+template<class Key, class Value>
+void AVLTree<Key, Value>::rotateLeft(AVLNode<Key,Value>*n){
+	AVLNode<Key,Value>* temp = n->getRight();
+	n->setRight(temp->getLeft());
+	if(n->getRight()!=nullptr) n->getRight()->setParent(n);
+	temp->setParent(n->getParent());
+	n->setParent(temp);
+	temp->setLeft(n);
+	if(temp->getParent()!=nullptr){
+		if(temp->getKey()<temp->getParent()->getKey()){
+			temp->getParent()->setLeft(temp);
+		}
+		else{
+			temp->getParent()->setRight(temp);	
+		}
+	}
+	else{
+		this->root_ = static_cast<Node<Key, Value>*>(temp); 
+	}
+}
+
+template<class Key, class Value>
+void AVLTree<Key, Value>::rotateRight(AVLNode<Key,Value>*n){
+	AVLNode<Key,Value>* temp = n->getLeft();
+	n->setLeft(temp->getRight());
+	if(n->getLeft()!=nullptr) n->getLeft()->setParent(n);
+	temp->setParent(n->getParent());
+	n->setParent(temp);
+	temp->setRight(n);
+	if(temp->getParent()!=nullptr){
+		if(temp->getKey()<temp->getParent()->getKey()){
+			temp->getParent()->setLeft(temp);
+		}
+		else{
+			temp->getParent()->setRight(temp);	
+		}
+	}
+	else{
+		this->root_ = static_cast<Node<Key, Value>*>(temp); 
+	}
+}
+
+template<class Key, class Value>
+void AVLTree<Key, Value>::Insertfix(AVLNode<Key,Value>*p, AVLNode<Key,Value>*n){
+	AVLNode<Key,Value>* gp = p->getParent();
+	if(gp==nullptr) return;
+	if(gp->getKey()>p->getKey()){
+		gp->updateBalance(-1);
+		if(gp->getBalance()==0) return;
+		else if(gp->getBalance()==-1){
+			Insertfix(gp,p);
+		}
+		else if(gp->getBalance()==-2){
+			if(p->getBalance()==-1){
+				rotateRight(gp);
+				p->setBalance(0);
+				gp->setBalance(0);
+			}
+			else{
+				rotateLeft(p);
+				rotateRight(gp);
+				if(n->getBalance()==-1){
+					p->setBalance(0);
+					gp->setBalance(1);
+					n->setBalance(0);
+				}
+				else if(n->getBalance()==0){
+					p->setBalance(0);
+					gp->setBalance(0);
+					n->setBalance(0);
+				
+				}
+				else if(n->getBalance()==1){
+					p->setBalance(-1);
+					gp->setBalance(0);
+					n->setBalance(0);
+				}
+			}
+		}
+	}
+	else{
+		gp->updateBalance(1);
+		if(gp->getBalance()==0) return;
+		else if(gp->getBalance()==1){
+			Insertfix(gp,p);
+		}
+		else if(gp->getBalance()==2){
+			if(p->getBalance()==1){
+				rotateLeft(gp);
+				p->setBalance(0);
+				gp->setBalance(0);
+			}
+			else{
+				rotateRight(p);
+				rotateLeft(gp);
+				if(n->getBalance()==1){
+					p->setBalance(0);
+					gp->setBalance(-1);
+					n->setBalance(0);
+				}
+				else if(n->getBalance()==0){
+					p->setBalance(0);
+					gp->setBalance(0);
+					n->setBalance(0);
+				}
+				else if(n->getBalance()==-1){
+					p->setBalance(1);
+					gp->setBalance(0);
+					n->setBalance(0);
+				}
+			}
+		}
+	}
+}
+
 
 /*
  * Recall: If key is already in the tree, you should 
@@ -149,6 +268,164 @@ template<class Key, class Value>
 void AVLTree<Key, Value>::insert (const std::pair<const Key, Value> &new_item)
 {
     // TODO
+    AVLNode<Key, Value>* temp = new AVLNode<Key, Value>(new_item.first,new_item.second,NULL);
+    if(this->root_==nullptr){
+			//std::cout << "till " << std::endl;
+			this->root_ = static_cast<Node<Key, Value>*>(temp);  
+			//std::cout << "till " << std::endl;
+		}
+    else{
+				//std::cout << "till " << std::endl;
+			AVLNode<Key, Value>* curr_ = static_cast<AVLNode<Key, Value>*>(this->root_);
+				//std::cout << "till " << std::endl;
+    	while(curr_!=nullptr){
+				if(curr_->getKey()>temp->getKey()){
+
+					if(curr_->getLeft()==nullptr){
+						//std::cout << "till " << std::endl;
+						curr_->setLeft(temp);
+						temp->setParent(curr_);
+						//std::cout << "till " << std::endl;
+						curr_->updateBalance(-1);
+						if(curr_->getBalance()!=0){
+							//std::cout << "till " << std::endl;
+							Insertfix(curr_,temp);
+						}
+						break;
+					}
+					curr_ = curr_->getLeft();
+
+				}
+				else if(curr_->getKey()==temp->getKey()){
+					curr_->setValue(temp->getValue());
+					delete temp;
+					break;
+				}
+				else {
+					if(curr_->getRight()==nullptr){
+						curr_->setRight(temp);
+						//std::cout << "till " << std::endl;
+						temp->setParent(curr_);
+						//std::cout << "till " << std::endl;
+						curr_->updateBalance(1);
+						if(curr_->getBalance()!=0){
+							//std::cout << "till " << std::endl;
+							Insertfix(curr_,temp);
+						}
+						break;
+					}
+					curr_ = curr_->getRight();
+				}
+			}
+		}
+
+}
+
+
+template<class Key, class Value>
+void AVLTree<Key, Value>::RemoveFix(AVLNode<Key,Value>* n, size_t diff){
+	if(n == nullptr) return;
+	AVLNode<Key, Value>* p = n->getParent();
+	int ndiff = 0;
+	//this->print();
+	if(p!=nullptr){
+		if(n->getKey()<p->getKey()){
+			ndiff = 1;
+		}
+		else{
+			ndiff = -1;
+		}
+	}
+	if((signed)diff==-1){
+		if((unsigned)n->getBalance()+diff==-2){
+			AVLNode<Key, Value>* c = n->getLeft();
+			if((signed)c->getBalance()==-1){
+				rotateRight(n);
+				n->setBalance(0);
+				c->setBalance(0);
+				RemoveFix(p, ndiff);
+			}
+			else if((signed)c->getBalance()==0){
+				rotateRight(n);
+				n->setBalance(-1);
+				c->setBalance(1);
+			}
+			else{
+				AVLNode<Key, Value>* g = c->getRight();
+				rotateLeft(c);
+				rotateRight(n);
+				if((signed)g->getBalance()==1){
+					n->setBalance(0);
+					c->setBalance(-1);
+					g->setBalance(0);
+				}
+				else if((signed)(g->getBalance())==0){
+					n->setBalance(0);
+					c->setBalance(0);
+					g->setBalance(0);
+				}
+				else{
+					n->setBalance(1);
+					c->setBalance(0);
+					g->setBalance(0);
+				}
+				RemoveFix(p, ndiff);
+			}
+
+		}
+		else if((signed)(n->getBalance() + diff )== -1){
+			n->setBalance(-1);
+		}
+		else{
+			n->setBalance(0);
+			RemoveFix(p,ndiff);
+		}
+	}
+	else{
+		if((signed)(n->getBalance()+diff)==2){
+			AVLNode<Key, Value>* c = n->getRight();
+			if(c->getBalance()==1){
+				rotateLeft(n);
+				n->setBalance(0);
+				c->setBalance(0);
+				RemoveFix(p, ndiff);
+			}
+			else if(c->getBalance()==0){
+				rotateLeft(n);
+				n->setBalance(1);
+				c->setBalance(-1);
+			}
+			else{
+				AVLNode<Key, Value>* g = c->getLeft();
+				rotateRight(c);
+				rotateLeft(n);
+				if(g->getBalance()==-1){
+					n->setBalance(0);
+					c->setBalance(1);
+					g->setBalance(0);
+				}
+				else if(g->getBalance()==0){
+					n->setBalance(0);
+					c->setBalance(0);
+					g->setBalance(0);
+				}
+				else{
+					n->setBalance(-1);
+					c->setBalance(0);
+					g->setBalance(0);
+				}
+				RemoveFix(p, ndiff);
+			}
+
+		}
+		else if(n->getBalance() + diff == 1){
+			n->setBalance(1);
+		}
+		else{
+			n->setBalance(0);
+			RemoveFix(p,ndiff);
+		}
+	}
 }
 
 /*
@@ -159,6 +436,143 @@ template<class Key, class Value>
 void AVLTree<Key, Value>:: remove(const Key& key)
 {
     // TODO
+    //if()
+    //AVLNode<Key, Value>* current_ = root_;
+    //while
+		int diff_ = 0;
+		if(this->root_==nullptr){
+		}
+    else{
+			AVLNode<Key, Value>* curr_ = static_cast<AVLNode<Key, Value>*>(this->root_);
+    	while(curr_!=nullptr){
+				if(curr_->getKey()>key){
+					curr_ = curr_->getLeft();
+
+				}
+				else if(curr_->getKey()==key){
+						AVLNode<Key, Value>* p;
+						if(curr_->getLeft()!=nullptr && curr_->getRight()!=nullptr){
+							AVLNode<Key, Value>* pred = static_cast<AVLNode<Key, Value>*>(this->predecessor(curr_));
+							nodeSwap(pred,curr_);
+							//std:: cout << pred->getKey() <<std::endl;
+							p = curr_->getParent();
+							if(p != nullptr){
+								if(pred->getKey()<=p->getKey()){
+									diff_ = 1;
+								}
+								else{
+									diff_ = -1;
+								}
+							}
+							// pointer adjust
+							if(curr_->getBalance()==0){
+								if(pred->getKey()<=p->getKey()){
+									p->setLeft(NULL);
+									delete curr_;
+								}
+								else{
+									p->setRight(NULL);;
+									delete curr_;
+								}							
+							}
+							else if(curr_->getBalance()==1){
+								if(pred->getKey()<=p->getKey()){
+									p->setLeft(curr_->getRight());
+									curr_->getRight()->setParent(p);
+									delete curr_;
+								}
+								else{
+									p->setRight(curr_->getRight());
+									curr_->getRight()->setParent(p);
+									delete curr_;
+								}
+							}
+							else{
+								if(pred->getKey()<=p->getKey()){
+									p->setLeft(curr_->getLeft());
+									curr_->getLeft()->setParent(p);
+									delete curr_;
+								}
+								else{
+									p->setRight(curr_->getLeft());
+									curr_->getLeft()->setParent(p);
+									delete curr_;
+								}
+							}
+						}
+						else{
+							p = curr_->getParent();
+							if(p != nullptr){
+								if(curr_->getKey()<p->getKey()){
+									diff_ = 1;
+								}
+								else{
+									diff_ = -1;
+								}
+							}
+							// pointer adjust
+							if(curr_->getBalance()==0){
+								if(p==nullptr){
+									delete curr_;
+									this->root_ = nullptr;
+									break;
+								}
+								if(curr_->getKey()<p->getKey()){
+									p->setLeft(NULL);
+									delete curr_;
+								}
+								else{
+									p->setRight(NULL);;
+									//std::cout << "till" << std::endl;
+									delete curr_;
+								}							
+							}
+							else if(curr_->getBalance()==1){
+								if(p==nullptr){
+									this->root_ = static_cast<Node<Key, Value>*>(curr_->getRight());
+									this->root_ ->setParent(NULL);
+									delete curr_;	
+									break;
+								}
+								if(curr_->getKey()<p->getKey()){
+									p->setLeft(curr_->getRight());
+									curr_->getRight()->setParent(p);
+									delete curr_;
+								}
+								else{
+									p->setRight(curr_->getRight());
+									curr_->getRight()->setParent(p);
+									delete curr_;
+								}
+							}
+							else{
+								if(p==nullptr){
+									this->root_ = static_cast<Node<Key, Value>*>(curr_->getLeft());
+									this->root_ ->setParent(NULL);
+									delete curr_;		
+									break;							
+								}
+								if(curr_->getKey()<p->getKey()){
+									p->setLeft(curr_->getLeft());
+									curr_->getLeft()->setParent(p);
+									delete curr_;
+								}
+								else{
+									p->setRight(curr_->getLeft());
+									curr_->getLeft()->setParent(p);
+									delete curr_;
+								}
+							}
+						}
+					//std:: cout << "till" <<std::endl;
+					RemoveFix(p,diff_);
+					break;
+				}
+				else {
+					curr_ = curr_->getRight();
+				}
+			}
+		}
 }
 
 template<class Key, class Value>
